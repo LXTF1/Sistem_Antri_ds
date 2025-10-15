@@ -42,7 +42,7 @@ function loadSettings() {
     document.getElementById('instansi-nama').textContent = instansiNama;
     
     // Load running text
-    const runningText = localStorage.getItem('runningText') || 'Selamat datang di Dinas Perhubungan Kab.Semarang.';
+    const runningText = localStorage.getItem('runningText') || 'Selamat datang di Dinas Perhubungan Kab.Semarang';
     document.getElementById('running-text').textContent = runningText;
 }
 
