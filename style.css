@@ -172,12 +172,12 @@ header {
 }
 
 .queue-list {
-    margin-top: -50px;
+    margin-top: -10px;
 }
 
 .current-queue h2, .queue-list h2 {
     font-size: 20px;
-    margin-bottom: 15px;
+    margin-bottom: 100px;
     color: #2c3e50;
     text-align: center;
 }
