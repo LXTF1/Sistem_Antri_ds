@@ -605,6 +605,10 @@ button:active {
     font-size: 18px;
 }
 
+.take-number-container button:last-of-type {
+    margin-top: 20px;
+}
+
 #queue-result {
     position: fixed;
     top: 0;
