@@ -131,16 +131,24 @@ function goToSlide(index) {
 function loadQueueData() {
     const currentQueue = localStorage.getItem('currentQueue') || '-';
     const queueNote = localStorage.getItem('queueNote') || 'Silakan menunggu nomor antrian Anda dipanggil';
-    
+
     document.getElementById('current-queue-number').textContent = currentQueue;
     document.getElementById('queue-note').textContent = queueNote;
-    
+
     // Load next queue items
     const queueList = JSON.parse(localStorage.getItem('queueList')) || [];
     for (let i = 0; i < 4; i++) {
         const queueItem = document.getElementById(`queue-next-${i + 1}`);
         queueItem.textContent = queueList[i] || '-';
     }
+
+    // Load angkutan queue
+    const angkutanQueue = localStorage.getItem('angkutanQueue') || '-';
+    document.getElementById('angkutan-next-1').textContent = angkutanQueue;
+
+    // Load barang queue
+    const barangQueue = localStorage.getItem('barangQueue') || '-';
+    document.getElementById('barang-next-1').textContent = barangQueue;
 }
 
 // Setup WebSocket for real-time updates
@@ -148,7 +156,7 @@ function setupWebSocket() {
     // Using local storage events for the demo
     // In a real system, you would implement WebSocket here
     window.addEventListener('storage', function(e) {
-        if (e.key === 'currentQueue' || e.key === 'queueList' || e.key === 'queueNote') {
+        if (e.key === 'currentQueue' || e.key === 'queueList' || e.key === 'queueNote' || e.key === 'angkutanQueue' || e.key === 'barangQueue') {
             loadQueueData();
         } else if (e.key === 'instansiNama' || e.key === 'runningText') {
             loadSettings();

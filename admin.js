@@ -220,12 +220,12 @@ function resetQueue() {
         localStorage.setItem('totalQueue', '0');
         localStorage.setItem('processedQueue', '0');
         localStorage.setItem('remainingQueue', '0');
-        
+
         document.getElementById('admin-current-number').textContent = '-';
         document.getElementById('total-queue').textContent = '0';
         document.getElementById('processed-queue').textContent = '0';
         document.getElementById('remaining-queue').textContent = '0';
-        
+
         alert('Antrian telah direset.');
     }
 }

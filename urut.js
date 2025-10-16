@@ -40,42 +40,37 @@ function loadSettings() {
     document.getElementById('urut-instansi-nama').textContent = instansiNama;
 }
 
+// Take queue number for angkutan umum
+function takeQueueNumberAngkutan() {
+    takeQueueNumber('angkutanQueue', 'A');
+}
+
+// Take queue number for barang
+function takeQueueNumberBarang() {
+    takeQueueNumber('barangQueue', 'B');
+}
+
 // Take queue number
-function takeQueueNumber() {
-    // Get current queue list
+function takeQueueNumber(queueKey, prefix) {
+    // Get current queue number for this type
+    let currentQueueNumber = parseInt(localStorage.getItem(queueKey) || '0');
+    currentQueueNumber += 1;
+
+    // Format queue number with prefix and leading zeros
+    const formattedQueueNumber = `${prefix}${String(currentQueueNumber).padStart(3, '0')}`;
+
+    // Save to localStorage
+    localStorage.setItem(queueKey, currentQueueNumber.toString());
+
+    // Add to general queue list for daftar antrian
     let queueList = JSON.parse(localStorage.getItem('queueList')) || [];
-    
-    // Determine next queue number
-    let nextQueueNumber;
-    
-    if (queueList.length === 0) {
-        // If queue is empty, start from 1
-        const processedQueue = parseInt(localStorage.getItem('processedQueue') || '0');
-        nextQueueNumber = processedQueue + 1;
-    } else {
-        // If queue has items, get the last number and increment
-        const lastQueueNumber = parseInt(queueList[queueList.length - 1]);
-        nextQueueNumber = lastQueueNumber + 1;
-    }
-    
-    // Format queue number with leading zeros
-    const formattedQueueNumber = String(nextQueueNumber).padStart(3, '0');
-    
-    // Add to queue list
     queueList.push(formattedQueueNumber);
     localStorage.setItem('queueList', JSON.stringify(queueList));
-    
-    // Update statistics
-    const totalQueue = parseInt(localStorage.getItem('totalQueue') || '0') + 1;
-    const remainingQueue = queueList.length;
-    
-    localStorage.setItem('totalQueue', totalQueue.toString());
-    localStorage.setItem('remainingQueue', remainingQueue.toString());
-    
+
     // Show result
     document.getElementById('result-number').textContent = formattedQueueNumber;
     document.getElementById('queue-result').classList.remove('hidden');
-    
+
     // Play sound notification
     speakText(`Anda mendapatkan nomor antrian ${formattedQueueNumber} Terima kasih.`);
 }
@@ -152,12 +147,13 @@ function printTicket() {
 
 // Setup event listeners
 function setupEventListeners() {
-    // Take number button
-    document.getElementById('take-number-btn').addEventListener('click', takeQueueNumber);
-    
+    // Take number buttons
+    document.getElementById('take-number-btn-angkutan').addEventListener('click', takeQueueNumberAngkutan);
+    document.getElementById('take-number-btn-barang').addEventListener('click', takeQueueNumberBarang);
+
     // Close result button
     document.getElementById('close-result-btn').addEventListener('click', closeResult);
-    
+
     // Print ticket button
     document.getElementById('print-ticket-btn').addEventListener('click', printTicket);
 }
