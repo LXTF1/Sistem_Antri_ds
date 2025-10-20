@@ -220,6 +220,8 @@ function resetQueue() {
         localStorage.setItem('totalQueue', '0');
         localStorage.setItem('processedQueue', '0');
         localStorage.setItem('remainingQueue', '0');
+        localStorage.setItem('angkutanQueue', '0');
+        localStorage.setItem('barangQueue', '0');
 
         document.getElementById('admin-current-number').textContent = '-';
         document.getElementById('total-queue').textContent = '0';

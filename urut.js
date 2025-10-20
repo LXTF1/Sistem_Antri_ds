@@ -42,7 +42,7 @@ function loadSettings() {
 
 // Take queue number for angkutan umum
 function takeQueueNumberAngkutan() {
-    takeQueueNumber('angkutanQueue', 'A');
+    takeQueueNumber('angkutanQueue', 'U');
 }
 
 // Take queue number for barang
