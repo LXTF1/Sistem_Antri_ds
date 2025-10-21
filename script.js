@@ -144,11 +144,11 @@ function loadQueueData() {
 
     // Load angkutan queue
     const angkutanQueue = localStorage.getItem('angkutanQueue') || '-';
-    document.getElementById('angkutan-next-1').textContent = angkutanQueue;
+    document.getElementById('angkutan-next-1').textContent = angkutanQueue !== '-' ? 'U' + angkutanQueue.padStart(3, '0') : '-';
 
     // Load barang queue
     const barangQueue = localStorage.getItem('barangQueue') || '-';
-    document.getElementById('barang-next-1').textContent = barangQueue;
+    document.getElementById('barang-next-1').textContent = barangQueue !== '-' ? 'B' + barangQueue.padStart(3, '0') : '-';
 }
 
 // Setup WebSocket for real-time updates
