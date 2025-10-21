@@ -206,6 +206,7 @@ header {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
+    place-items: center;
 }
 
 .queue-item {
@@ -216,6 +217,9 @@ header {
     font-size: 24px;
     font-weight: 600;
     color: #202020ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Admin Page (admin.html) */
