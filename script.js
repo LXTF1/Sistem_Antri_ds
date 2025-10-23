@@ -135,11 +135,13 @@ function loadQueueData() {
     document.getElementById('current-queue-number').textContent = currentQueue;
     document.getElementById('queue-note').textContent = queueNote;
 
-    // Load next queue items
+    // Load queue list into grid
     const queueList = JSON.parse(localStorage.getItem('queueList')) || [];
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 10; i++) {
         const queueItem = document.getElementById(`queue-next-${i + 1}`);
-        queueItem.textContent = queueList[i] || '-';
+        if (queueItem) {
+            queueItem.textContent = queueList[i] || '-';
+        }
     }
 
     // Load angkutan queue

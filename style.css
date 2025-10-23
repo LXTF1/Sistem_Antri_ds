@@ -160,7 +160,7 @@ header {
 .running-text-container {
     background-color: #2c3e50;
     color: #fff;
-    padding: 10px;
+    padding: 15px;
     margin-top: 15px;
     border-radius: 10px;
 }
@@ -448,6 +448,51 @@ button:active {
 
 .queue-note-section {
     grid-column: span 2;
+}
+
+.queue-list-section {
+    grid-column: span 2;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.queue-list-section h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #2c3e50;
+}
+
+.queue-list-display {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #fff;
+}
+
+.queue-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 5px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    border-left: 4px solid #3498db;
+}
+
+.queue-item .queue-number {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.queue-item .queue-position {
+    font-size: 14px;
+    color: #666;
 }
 
 .queue-status {

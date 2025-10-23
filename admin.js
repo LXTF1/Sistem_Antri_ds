@@ -80,11 +80,14 @@ function loadAdminData() {
     const totalQueue = parseInt(localStorage.getItem('totalQueue') || '0');
     const processedQueue = parseInt(localStorage.getItem('processedQueue') || '0');
     const remainingQueue = parseInt(localStorage.getItem('remainingQueue') || '0');
-    
+
     document.getElementById('total-queue').textContent = totalQueue;
     document.getElementById('processed-queue').textContent = processedQueue;
     document.getElementById('remaining-queue').textContent = remainingQueue;
-    
+
+    // Load and display queue list
+    loadQueueList();
+
     // Load slideshow
     loadSlideshowSettings();
 }
@@ -193,7 +196,7 @@ function callNextQueue() {
         
         // Update queue list
         localStorage.setItem('queueList', JSON.stringify(queueList));
-        
+
         // Update statistics
         const totalQueue = parseInt(localStorage.getItem('totalQueue') || '0') + 1;
         const processedQueue = parseInt(localStorage.getItem('processedQueue') || '0') + 1;
@@ -206,7 +209,10 @@ function callNextQueue() {
         document.getElementById('total-queue').textContent = totalQueue;
         document.getElementById('processed-queue').textContent = processedQueue;
         document.getElementById('remaining-queue').textContent = remainingQueue;
-        
+
+        // Update queue list display
+        loadQueueList();
+
         // Announce the next queue
         speakText(`Panggilan nomor antrian ${nextQueue} terima kasih.`);
     } else {
@@ -229,6 +235,9 @@ function resetQueue() {
         document.getElementById('total-queue').textContent = '0';
         document.getElementById('processed-queue').textContent = '0';
         document.getElementById('remaining-queue').textContent = '0';
+
+        // Update queue list display
+        loadQueueList();
 
         alert('Antrian telah direset.');
     }
@@ -375,6 +384,29 @@ function setupEventListeners() {
     });
 }
 
+// Load and display queue list
+function loadQueueList() {
+    const queueListDisplay = document.getElementById('queue-list-display');
+    const queueList = JSON.parse(localStorage.getItem('queueList')) || [];
+
+    queueListDisplay.innerHTML = '';
+
+    if (queueList.length === 0) {
+        queueListDisplay.innerHTML = '<p>Tidak ada antrian saat ini.</p>';
+        return;
+    }
+
+    queueList.forEach((queueNumber, index) => {
+        const queueItem = document.createElement('div');
+        queueItem.className = 'queue-item';
+        queueItem.innerHTML = `
+            <span class="queue-number">${queueNumber}</span>
+            <span class="queue-position">Posisi: ${index + 1}</span>
+        `;
+        queueListDisplay.appendChild(queueItem);
+    });
+}
+
 // Speech functionality
 function speakText(text) {
     // Using the free Web Speech API
@@ -384,6 +416,6 @@ function speakText(text) {
     speech.volume = 1;
     speech.rate = 1;
     speech.pitch = 1;
-    
+
     window.speechSynthesis.speak(speech);
 }
