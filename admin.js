@@ -195,13 +195,15 @@ function callNextQueue() {
         localStorage.setItem('queueList', JSON.stringify(queueList));
         
         // Update statistics
-        const totalQueue = parseInt(localStorage.getItem('totalQueue') || '0');
+        const totalQueue = parseInt(localStorage.getItem('totalQueue') || '0') + 1;
         const processedQueue = parseInt(localStorage.getItem('processedQueue') || '0') + 1;
         const remainingQueue = queueList.length;
-        
+
+        localStorage.setItem('totalQueue', totalQueue.toString());
         localStorage.setItem('processedQueue', processedQueue.toString());
         localStorage.setItem('remainingQueue', remainingQueue.toString());
-        
+
+        document.getElementById('total-queue').textContent = totalQueue;
         document.getElementById('processed-queue').textContent = processedQueue;
         document.getElementById('remaining-queue').textContent = remainingQueue;
         
