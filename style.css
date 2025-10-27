@@ -361,7 +361,7 @@ button:active {
 
 .sidebar-btn {
     background-color: transparent;
-    color: #ecf0f1;
+    color: #ffffffff;
     text-align: left;
     padding: 12px 20px;
     margin-bottom: 5px;
@@ -376,7 +376,7 @@ button:active {
 
 .sidebar-btn.active {
     background-color: rgba(255, 255, 255, 0.15);
-    border-left-color: #3498db;
+    border-left-color: hsla(45, 95%, 69%, 1.00);
 }
 
 .logout-btn {
