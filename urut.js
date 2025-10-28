@@ -67,6 +67,20 @@ function takeQueueNumber(queueKey, prefix) {
     queueList.push(formattedQueueNumber);
     localStorage.setItem('queueList', JSON.stringify(queueList));
 
+    // Update remaining queue count
+    const remainingQueue = queueList.length;
+    localStorage.setItem('remainingQueue', remainingQueue.toString());
+
+    // Record history
+    let queueHistory = JSON.parse(localStorage.getItem('queueHistory')) || [];
+    const jenisAngkutan = prefix === 'U' ? 'Angkutan Umum' : 'Angkutan Barang';
+    queueHistory.push({
+        number: formattedQueueNumber,
+        type: jenisAngkutan,
+        timestamp: new Date().toISOString()
+    });
+    localStorage.setItem('queueHistory', JSON.stringify(queueHistory));
+
     // Show result
     document.getElementById('result-number').textContent = formattedQueueNumber;
     document.getElementById('queue-result').classList.remove('hidden');

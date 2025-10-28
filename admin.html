@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
     <div id="login-container" class="login-container">
@@ -52,6 +54,7 @@
                             <div class="admin-queue-number" id="admin-current-number">-</div>
                         </div>
                         <div class="queue-actions">
+                            <button id="complete-queue-btn" class="success-btn">Antrian Selesai</button>
                             <button id="call-next-btn" class="primary-btn">Panggil Berikutnya</button>
                             <button id="reset-queue-btn" class="danger-btn">Reset Antrian</button>
                         </div>
@@ -155,7 +158,46 @@
                     <h2>History</h2>
                     <div class="settings-section">
                         <h3>Riwayat Antrian</h3>
-                        <p>History data akan ditampilkan di sini.</p>
+                        <div class="history-controls">
+                            <div class="filter-group">
+                                <label for="history-filter">Filter Jenis Angkutan:</label>
+                                <select id="history-filter" class="filter-select">
+                                    <option value="all">Semua</option>
+                                    <option value="Angkutan Umum">Angkutan Umum</option>
+                                    <option value="Angkutan Barang">Angkutan Barang</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="history-status-filter">Filter Status:</label>
+                                <select id="history-status-filter" class="filter-select">
+                                    <option value="all">Semua</option>
+                                    <option value="Dipanggil">Dipanggil</option>
+                                    <option value="Selesai">Selesai</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="history-date-filter">Filter Tanggal:</label>
+                                <input type="date" id="history-date-filter" class="filter-select">
+                            </div>
+                            <button id="download-pdf-btn" class="primary-btn">Download PDF</button>
+                            <button id="download-excel-btn" class="secondary-btn">Download Excel</button>
+                            <button id="delete-history-btn" class="danger-btn">Hapus Riwayat</button>
+                        </div>
+                        <table id="history-table" class="history-table">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nomor Antrian</th>
+                                    <th>Jenis Angkutan</th>
+                                    <th>Status</th>
+                                    <th>Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-table-body">
+                                <!-- History rows will be populated here -->
+                            </tbody>
+                        </table>
+                        <p id="no-history" class="no-history">Belum ada riwayat antrian.</p>
                     </div>
                 </div>
             </div>
