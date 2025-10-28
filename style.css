@@ -306,6 +306,10 @@ button:active {
     color: white;
 }
 
+.success-btn{
+    background-color: #37823eff;
+    color: white;
+}
 .primary-btn:hover {
     background-color: #2980b9;
 }

@@ -205,6 +205,14 @@ function addSlide() {
 
 // Call next queue
 function callNextQueue() {
+    console.log('callNextQueue function called');
+    const currentQueue = localStorage.getItem('currentQueue') || '-';
+    console.log('currentQueue:', currentQueue);
+    if (currentQueue !== '-') {
+        console.log('Showing alert because currentQueue is not completed');
+        alert('Harap selesaikan antrian saat ini terlebih dahulu dengan menekan \'Antrian Selesai\'.');
+        return;
+    }
     let queueList = JSON.parse(localStorage.getItem('queueList')) || [];
     
     if (queueList.length > 0) {
