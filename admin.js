@@ -368,12 +368,8 @@ function hashPassword(password) {
 function setupEventListeners() {
     // Listen for localStorage changes to auto-update queue list and statistics
     window.addEventListener('storage', function(e) {
-        if (e.key === 'queueList') {
-            loadQueueList();
-        }
-        if (e.key === 'remainingQueue') {
-            const remainingQueue = parseInt(localStorage.getItem('remainingQueue') || '0');
-            document.getElementById('remaining-queue').textContent = remainingQueue;
+        if (e.key === 'queueList' || e.key === 'currentQueue' || e.key === 'totalQueue' || e.key === 'processedQueue' || e.key === 'remainingQueue' || e.key === 'angkutanQueue' || e.key === 'barangQueue' || e.key === 'queueHistory') {
+            loadAdminData();
         }
     });
 
@@ -423,6 +419,12 @@ function setupEventListeners() {
 
     // Delete history button
     document.getElementById('delete-history-btn').addEventListener('click', deleteHistory);
+
+    // Delete selected history button
+    document.getElementById('delete-selected-history-btn').addEventListener('click', deleteSelectedHistory);
+
+    // Select all history checkbox
+    document.getElementById('select-all-history').addEventListener('change', toggleSelectAllHistory);
 
     // History filter
     document.getElementById('history-filter').addEventListener('change', filterHistory);
@@ -518,10 +520,14 @@ function loadHistory() {
             second: '2-digit'
         });
 
+        // Determine jenis angkutan based on code in queue number
+        const jenisAngkutan = entry.number.startsWith('B') ? 'Angkutan Barang' : 'Angkutan Umum';
+
         row.innerHTML = `
+            <td><input type="checkbox" class="history-checkbox" data-index="${queueHistory.indexOf(entry)}"></td>
             <td>${index + 1}</td>
             <td>${entry.number}</td>
-            <td>${entry.type}</td>
+            <td>${jenisAngkutan}</td>
             <td class="status-${(entry.status || 'Dipanggil').replace(/\s+/g, '-').toLowerCase()}">${entry.status || 'Dipanggil'}</td>
             <td>${formattedTimestamp}</td>
         `;
@@ -612,9 +618,12 @@ function downloadHistoryPDF() {
             second: '2-digit'
         });
 
+        // Determine jenis angkutan based on code in queue number
+        const jenisAngkutan = entry.number.startsWith('B') ? 'Angkutan Barang' : 'Angkutan Umum';
+
         doc.text((index + 1).toString(), 20, y);
         doc.text(entry.number, 40, y);
-        doc.text(entry.type, 80, y);
+        doc.text(jenisAngkutan, 80, y);
         doc.text(entry.status || 'Dipanggil', 120, y);
         doc.text(formattedTimestamp, 150, y);
 
@@ -684,10 +693,13 @@ function downloadHistoryExcel() {
             second: '2-digit'
         });
 
+        // Determine jenis angkutan based on code in queue number
+        const jenisAngkutan = entry.number.startsWith('B') ? 'Angkutan Barang' : 'Angkutan Umum';
+
         data.push([
             index + 1,
             entry.number,
-            entry.type,
+            jenisAngkutan,
             entry.status || 'Dipanggil',
             formattedTimestamp
         ]);
@@ -718,11 +730,11 @@ function completeQueue() {
     if (currentQueue && currentQueue !== '-') {
         // Add to history with status "Selesai"
         const queueHistory = JSON.parse(localStorage.getItem('queueHistory')) || [];
-        const currentType = localStorage.getItem('currentQueueType') || 'Angkutan Umum'; // Assuming we store the type
+        const jenisAngkutan = currentQueue.startsWith('B') ? 'Angkutan Barang' : 'Angkutan Umum';
 
         queueHistory.push({
             number: currentQueue,
-            type: currentType,
+            type: jenisAngkutan,
             status: 'Selesai',
             timestamp: new Date().toISOString()
         });
@@ -739,6 +751,38 @@ function completeQueue() {
     } else {
         alert('Tidak ada antrian saat ini untuk diselesaikan.');
     }
+}
+
+// Delete selected history
+function deleteSelectedHistory() {
+    const checkboxes = document.querySelectorAll('.history-checkbox:checked');
+    if (checkboxes.length === 0) {
+        alert('Pilih setidaknya satu entri riwayat untuk dihapus.');
+        return;
+    }
+
+    if (confirm(`Apakah Anda yakin ingin menghapus ${checkboxes.length} entri riwayat yang dipilih? Tindakan ini tidak dapat dibatalkan.`)) {
+        const queueHistory = JSON.parse(localStorage.getItem('queueHistory')) || [];
+        const indicesToDelete = Array.from(checkboxes).map(cb => parseInt(cb.getAttribute('data-index'))).sort((a, b) => b - a);
+
+        indicesToDelete.forEach(index => {
+            queueHistory.splice(index, 1);
+        });
+
+        localStorage.setItem('queueHistory', JSON.stringify(queueHistory));
+        loadHistory();
+        alert(`${checkboxes.length} entri riwayat telah dihapus.`);
+    }
+}
+
+// Toggle select all history checkboxes
+function toggleSelectAllHistory() {
+    const selectAllCheckbox = document.getElementById('select-all-history');
+    const checkboxes = document.querySelectorAll('.history-checkbox');
+
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAllCheckbox.checked;
+    });
 }
 
 // Delete history
