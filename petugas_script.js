@@ -100,6 +100,9 @@ function callNextQueue() {
     let queueList = JSON.parse(localStorage.getItem('queueList')) || [];
 
     if (queueList.length > 0) {
+        // Get the petugas who is calling the queue
+        const currentPetugas = sessionStorage.getItem('currentPetugas') || 'Petugas';
+
         // Get next queue number
         const nextQueue = queueList.shift();
 
@@ -107,24 +110,41 @@ function callNextQueue() {
         localStorage.setItem('currentQueue', nextQueue);
         document.getElementById('admin-current-number').textContent = nextQueue;
 
+        // Store the petugas who called this queue
+        localStorage.setItem('currentQueuePetugas', currentPetugas);
+
         // Update queue list
         localStorage.setItem('queueList', JSON.stringify(queueList));
 
         // Update statistics
         const totalQueue = parseInt(localStorage.getItem('totalQueue') || '0') + 1;
-        const processedQueue = parseInt(localStorage.getItem('processedQueue') || '0') + 1;
         const remainingQueue = queueList.length;
 
         localStorage.setItem('totalQueue', totalQueue.toString());
-        localStorage.setItem('processedQueue', processedQueue.toString());
         localStorage.setItem('remainingQueue', remainingQueue.toString());
 
         document.getElementById('total-queue').textContent = totalQueue;
-        document.getElementById('processed-queue').textContent = processedQueue;
         document.getElementById('remaining-queue').textContent = remainingQueue;
 
         // Update queue list display
         loadQueueList();
+
+        // Add to history with status "Dipanggil"
+        const queueHistory = JSON.parse(localStorage.getItem('queueHistory')) || [];
+        const jenisAngkutan = nextQueue.startsWith('B') ? 'Angkutan Barang' : 'Angkutan Umum';
+
+        queueHistory.push({
+            number: nextQueue,
+            type: jenisAngkutan,
+            status: 'Dipanggil',
+            petugas: currentPetugas,
+            timestamp: new Date().toISOString()
+        });
+
+        localStorage.setItem('queueHistory', JSON.stringify(queueHistory));
+
+        // Refresh history display
+        loadHistory();
 
         // Announce the next queue
         speakText(`Panggilan nomor antrian ${nextQueue} silahkan menuju ruangan uji.`);
@@ -137,6 +157,7 @@ function callNextQueue() {
 function resetQueue() {
     if (confirm('Apakah Anda yakin ingin mereset seluruh antrian?')) {
         localStorage.setItem('currentQueue', '-');
+        localStorage.removeItem('currentQueuePetugas');
         localStorage.setItem('queueList', JSON.stringify([]));
         localStorage.setItem('totalQueue', '0');
         localStorage.setItem('processedQueue', '0');
@@ -356,23 +377,43 @@ function loadQueueList() {
 // Complete queue
 function completeQueue() {
     const currentQueue = localStorage.getItem('currentQueue');
+    const currentQueuePetugas = localStorage.getItem('currentQueuePetugas');
+    const loggedInPetugas = sessionStorage.getItem('currentPetugas');
+
     if (currentQueue && currentQueue !== '-') {
+        // Check if the logged-in petugas is the one who called this queue
+        if (currentQueuePetugas !== loggedInPetugas) {
+            alert('Hanya petugas yang memanggil antrian ini yang dapat menyelesaikannya.');
+            return;
+        }
+
         // Add to history with status "Selesai"
         const queueHistory = JSON.parse(localStorage.getItem('queueHistory')) || [];
         const jenisAngkutan = currentQueue.startsWith('B') ? 'Angkutan Barang' : 'Angkutan Umum';
+        const currentPetugas = sessionStorage.getItem('currentPetugas') || 'Petugas';
 
         queueHistory.push({
             number: currentQueue,
             type: jenisAngkutan,
             status: 'Selesai',
+            petugas: currentPetugas,
             timestamp: new Date().toISOString()
         });
 
         localStorage.setItem('queueHistory', JSON.stringify(queueHistory));
 
-        // Clear current queue
+        // Update statistics
+        const processedQueue = parseInt(localStorage.getItem('processedQueue') || '0') + 1;
+        localStorage.setItem('processedQueue', processedQueue.toString());
+        document.getElementById('processed-queue').textContent = processedQueue;
+
+        // Clear current queue and petugas
         localStorage.setItem('currentQueue', '-');
+        localStorage.removeItem('currentQueuePetugas');
         document.getElementById('admin-current-number').textContent = '-';
+
+        // Refresh history display
+        loadHistory();
 
         alert(`Antrian ${currentQueue} telah selesai dan ditambahkan ke riwayat.`);
     } else {
@@ -422,6 +463,7 @@ function loadHistory() {
             <td>${item.number}</td>
             <td>${item.type}</td>
             <td>${item.status}</td>
+            <td>${item.petugas && item.petugas !== 'undefined' ? item.petugas : 'Petugas'}</td>
             <td>${formattedDate} ${formattedTime}</td>
         `;
         historyTableBody.appendChild(row);
@@ -480,6 +522,7 @@ function filterHistory() {
             <td>${item.number}</td>
             <td>${item.type}</td>
             <td>${item.status}</td>
+            <td>${item.petugas && item.petugas !== 'undefined' ? item.petugas : 'Petugas'}</td>
             <td>${formattedDate} ${formattedTime}</td>
         `;
         historyTableBody.appendChild(row);
@@ -514,7 +557,8 @@ function downloadHistoryPDF() {
         doc.text('Nomor Antrian', 35, yPosition);
         doc.text('Jenis Angkutan', 70, yPosition);
         doc.text('Status', 110, yPosition);
-        doc.text('Timestamp', 140, yPosition);
+        doc.text('Petugas', 140, yPosition);
+        doc.text('Timestamp', 170, yPosition);
         yPosition += 10;
 
         queueHistory.forEach((item, index) => {
@@ -531,7 +575,8 @@ function downloadHistoryPDF() {
             doc.text(item.number, 35, yPosition);
             doc.text(item.type, 70, yPosition);
             doc.text(item.status, 110, yPosition);
-            doc.text(`${formattedDate} ${formattedTime}`, 140, yPosition);
+            doc.text(item.petugas || 'Petugas', 140, yPosition);
+            doc.text(`${formattedDate} ${formattedTime}`, 170, yPosition);
             yPosition += 8;
         });
     }
@@ -562,6 +607,7 @@ function downloadHistoryExcel() {
             'Nomor Antrian': item.number,
             'Jenis Angkutan': item.type,
             'Status': item.status,
+            'Petugas': item.petugas || 'Petugas',
             'Tanggal': formattedDate,
             'Waktu': formattedTime
         };

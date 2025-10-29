@@ -556,6 +556,7 @@ function loadHistory() {
             <td>${entry.number}</td>
             <td>${jenisAngkutan}</td>
             <td class="status-${(entry.status || 'Dipanggil').replace(/\s+/g, '-').toLowerCase()}">${entry.status || 'Dipanggil'}</td>
+            <td>${entry.petugas || 'Admin'}</td>
             <td>${formattedTimestamp}</td>
         `;
         historyTableBody.appendChild(row);
@@ -602,7 +603,8 @@ function downloadHistoryPDF() {
     doc.text('Nomor Antrian', 40, 40);
     doc.text('Jenis Angkutan', 80, 40);
     doc.text('Status', 120, 40);
-    doc.text('Timestamp', 150, 40);
+    doc.text('Petugas', 140, 40);
+    doc.text('Timestamp', 160, 40);
 
     // Add data
     let y = 50;
@@ -652,7 +654,8 @@ function downloadHistoryPDF() {
         doc.text(entry.number, 40, y);
         doc.text(jenisAngkutan, 80, y);
         doc.text(entry.status || 'Dipanggil', 120, y);
-        doc.text(formattedTimestamp, 150, y);
+        doc.text(entry.petugas || 'Admin', 140, y);
+        doc.text(formattedTimestamp, 160, y);
 
         y += 10;
 
@@ -678,7 +681,7 @@ function downloadHistoryExcel() {
 
     // Prepare data for Excel
     const data = [
-        ['No', 'Nomor Antrian', 'Jenis Angkutan', 'Status', 'Timestamp']
+        ['No', 'Nomor Antrian', 'Jenis Angkutan', 'Status', 'Petugas', 'Timestamp']
     ];
 
     queueHistory.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -728,6 +731,7 @@ function downloadHistoryExcel() {
             entry.number,
             jenisAngkutan,
             entry.status || 'Dipanggil',
+            entry.petugas || 'Admin',
             formattedTimestamp
         ]);
     });
@@ -763,6 +767,7 @@ function completeQueue() {
             number: currentQueue,
             type: jenisAngkutan,
             status: 'Selesai',
+            petugas: 'Admin',
             timestamp: new Date().toISOString()
         });
 
@@ -772,7 +777,8 @@ function completeQueue() {
         localStorage.setItem('currentQueue', '-');
         document.getElementById('admin-current-number').textContent = '-';
 
-
+        // Update history display immediately
+        loadHistory();
 
         alert(`Antrian ${currentQueue} telah selesai dan ditambahkan ke riwayat.`);
     } else {
