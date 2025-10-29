@@ -109,6 +109,9 @@ function loadAdminData() {
     // Load slideshow
     loadSlideshowSettings();
 
+    // Load petugas list
+    loadPetugasList();
+
     // Load history
     loadHistory();
 }
@@ -413,6 +416,13 @@ function setupEventListeners() {
     // System settings
     document.getElementById('change-password-btn').addEventListener('click', changePassword);
 
+    // Petugas management
+    document.getElementById('add-petugas-btn').addEventListener('click', addPetugas);
+
+    // Make petugas password fields visible (not hidden)
+    document.getElementById('new-petugas-password').setAttribute('type', 'text');
+    document.getElementById('confirm-petugas-password').setAttribute('type', 'text');
+
     // History download buttons
     document.getElementById('download-pdf-btn').addEventListener('click', downloadHistoryPDF);
     document.getElementById('download-excel-btn').addEventListener('click', downloadHistoryExcel);
@@ -436,6 +446,23 @@ function setupEventListeners() {
         if (e.key === 'Enter') {
             login();
         }
+    });
+
+    // Password visibility toggle
+    const passwordInput = document.getElementById('password');
+    const toggleBtn = document.createElement('button');
+    toggleBtn.type = 'button';
+    toggleBtn.textContent = 'Show';
+    toggleBtn.id = 'toggle-password';
+    toggleBtn.style.fontSize = '12px';
+    toggleBtn.style.padding = '2px 5px';
+    toggleBtn.style.marginRight = '5px';
+    passwordInput.parentNode.insertBefore(toggleBtn, passwordInput);
+
+    toggleBtn.addEventListener('click', function() {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        this.textContent = type === 'password' ? 'Show' : 'Hide';
     });
 }
 
@@ -791,5 +818,145 @@ function deleteHistory() {
         localStorage.removeItem('queueHistory');
         loadHistory();
         alert('Riwayat antrian telah dihapus.');
+    }
+}
+
+// Load petugas list
+function loadPetugasList() {
+    const petugasList = document.getElementById('petugas-list');
+    petugasList.innerHTML = '';
+
+    // Get petugas from localStorage or use defaults
+    let petugas = JSON.parse(localStorage.getItem('petugasList')) || [
+        { username: 'petugas1', passwordHash: hashPassword('password1') },
+        { username: 'petugas2', passwordHash: hashPassword('password2') }
+    ];
+
+    // Create petugas items
+    petugas.forEach((petugasItem, index) => {
+        const petugasDiv = document.createElement('div');
+        petugasDiv.className = 'petugas-item';
+        petugasDiv.innerHTML = `
+            <span class="petugas-username">${petugasItem.username}</span>
+            <div class="petugas-actions">
+                <button class="petugas-action-btn edit-petugas" data-index="${index}">Edit</button>
+                <button class="petugas-action-btn delete-petugas" data-index="${index}">Delete</button>
+            </div>
+        `;
+        petugasList.appendChild(petugasDiv);
+    });
+
+    // Add edit and delete event listeners
+    document.querySelectorAll('.edit-petugas').forEach(button => {
+        button.addEventListener('click', function() {
+            const index = this.getAttribute('data-index');
+            editPetugas(index);
+        });
+    });
+
+    document.querySelectorAll('.delete-petugas').forEach(button => {
+        button.addEventListener('click', function() {
+            const index = this.getAttribute('data-index');
+            deletePetugas(index);
+        });
+    });
+}
+
+// Add new petugas
+function addPetugas() {
+    const username = document.getElementById('new-petugas-username').value.trim();
+    const password = document.getElementById('new-petugas-password').value;
+    const confirmPassword = document.getElementById('confirm-petugas-password').value;
+
+    const errorElement = document.getElementById('petugas-error');
+    const successElement = document.getElementById('petugas-success');
+
+    errorElement.textContent = '';
+    successElement.textContent = '';
+
+    // Validate input
+    if (!username) {
+        errorElement.textContent = 'Username tidak boleh kosong!';
+        return;
+    }
+
+    if (password !== confirmPassword) {
+        errorElement.textContent = 'Password dan konfirmasi password tidak cocok!';
+        return;
+    }
+
+    if (password.length < 6) {
+        errorElement.textContent = 'Password minimal 6 karakter!';
+        return;
+    }
+
+    // Check if username already exists
+    let petugas = JSON.parse(localStorage.getItem('petugasList')) || [];
+    if (petugas.some(p => p.username === username)) {
+        errorElement.textContent = 'Username sudah ada!';
+        return;
+    }
+
+    // Add new petugas
+    petugas.push({
+        username: username,
+        passwordHash: hashPassword(password)
+    });
+
+    localStorage.setItem('petugasList', JSON.stringify(petugas));
+    successElement.textContent = 'Petugas berhasil ditambahkan!';
+
+    // Clear form
+    document.getElementById('new-petugas-username').value = '';
+    document.getElementById('new-petugas-password').value = '';
+    document.getElementById('confirm-petugas-password').value = '';
+
+    // Reload petugas list
+    loadPetugasList();
+}
+
+// Edit petugas
+function editPetugas(index) {
+    let petugas = JSON.parse(localStorage.getItem('petugasList')) || [];
+    const petugasItem = petugas[index];
+
+    const newUsername = prompt('Masukkan username baru:', petugasItem.username);
+    if (newUsername === null) return; // User cancelled
+
+    const newPassword = prompt('Masukkan password baru (minimal 6 karakter):');
+    if (newPassword === null) return; // User cancelled
+
+    // Validate inputs
+    if (!newUsername.trim()) {
+        alert('Username tidak boleh kosong!');
+        return;
+    }
+
+    if (newPassword.length < 6) {
+        alert('Password minimal 6 karakter!');
+        return;
+    }
+
+    // Check if new username already exists (if changed)
+    if (newUsername !== petugasItem.username && petugas.some(p => p.username === newUsername)) {
+        alert('Username sudah ada!');
+        return;
+    }
+
+    // Update petugas
+    petugas[index].username = newUsername;
+    petugas[index].passwordHash = hashPassword(newPassword);
+    localStorage.setItem('petugasList', JSON.stringify(petugas));
+    loadPetugasList();
+    alert('Petugas berhasil diperbarui!');
+}
+
+// Delete petugas
+function deletePetugas(index) {
+    if (confirm('Apakah Anda yakin ingin menghapus petugas ini?')) {
+        let petugas = JSON.parse(localStorage.getItem('petugasList')) || [];
+        petugas.splice(index, 1);
+        localStorage.setItem('petugasList', JSON.stringify(petugas));
+        loadPetugasList();
     }
 }

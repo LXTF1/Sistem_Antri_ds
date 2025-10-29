@@ -765,6 +765,25 @@ button:active {
     background-color: #fff;
 }
 
+/* Petugas Management Styles */
+.petugas-action-btn.edit-petugas {
+    background-color: #3498db;
+    color: white;
+}
+
+.petugas-action-btn.edit-petugas:hover {
+    background-color: #2980b9;
+}
+
+.petugas-action-btn.delete-petugas {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.petugas-action-btn.delete-petugas:hover {
+    background-color: #c0392b;
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
     .main-container {

@@ -212,12 +212,18 @@ function login() {
     const password = document.getElementById('password').value;
     const errorElement = document.getElementById('login-error');
 
-    // Get stored credentials or use defaults
-    const storedUsername = localStorage.getItem('petugasUsername') || 'petugas';
-    const storedHash = localStorage.getItem('petugasPasswordHash') || hashPassword('petugas123');
+    // Get petugas list from localStorage
+    const petugasList = JSON.parse(localStorage.getItem('petugasList')) || [
+        { username: 'petugas1', passwordHash: hashPassword('password1') },
+        { username: 'petugas2', passwordHash: hashPassword('password2') }
+    ];
 
-    if (username === storedUsername && hashPassword(password) === storedHash) {
+    // Check if username and password match any petugas
+    const petugas = petugasList.find(p => p.username === username && p.passwordHash === hashPassword(password));
+
+    if (petugas) {
         sessionStorage.setItem('petugasLoggedIn', 'true');
+        sessionStorage.setItem('currentPetugas', username);
         showPetugasPanel();
         loadPetugasData();
         errorElement.textContent = '';
@@ -304,6 +310,23 @@ function setupEventListeners() {
         if (e.key === 'Enter') {
             login();
         }
+    });
+
+    // Password visibility toggle
+    const passwordInput = document.getElementById('password');
+    const toggleBtn = document.createElement('button');
+    toggleBtn.type = 'button';
+    toggleBtn.textContent = 'Show';
+    toggleBtn.id = 'toggle-password';
+    toggleBtn.style.fontSize = '12px';
+    toggleBtn.style.padding = '2px 5px';
+    toggleBtn.style.marginRight = '5px';
+    passwordInput.parentNode.insertBefore(toggleBtn, passwordInput);
+
+    toggleBtn.addEventListener('click', function() {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        this.textContent = type === 'password' ? 'Show' : 'Hide';
     });
 }
 

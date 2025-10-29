@@ -40,6 +40,7 @@
             <div class="sidebar">
                 <button class="sidebar-btn active" data-target="queue-management">Manajemen Antrian</button>
                 <button class="sidebar-btn" data-target="display-settings">Pengaturan Tampilan</button>
+                <button class="sidebar-btn" data-target="petugas-management">Manajemen Petugas</button>
                 <button class="sidebar-btn" data-target="system-settings">Pengaturan Sistem</button>
                 <button class="sidebar-btn" data-target="history-data">Riwayat Antrian</button>
                 <button id="logout-btn" class="logout-btn">Logout</button>
@@ -129,6 +130,36 @@
                     </div>
                     <div class="settings-actions">
                         <button id="save-display-settings" class="primary-btn">Simpan Pengaturan</button>
+                    </div>
+                </div>
+
+                <div id="petugas-management" class="admin-section">
+                    <h2>Manajemen Petugas</h2>
+                    <div class="settings-section">
+                        <h3>Tambah Petugas Baru</h3>
+                        <div class="settings-group">
+                            <div class="input-group">
+                                <label for="new-petugas-username">Username</label>
+                                <input type="text" id="new-petugas-username" placeholder="Masukkan username">
+                            </div>
+                            <div class="input-group">
+                                <label for="new-petugas-password">Password</label>
+                                <input type="password" id="new-petugas-password" placeholder="Masukkan password">
+                            </div>
+                            <div class="input-group">
+                                <label for="confirm-petugas-password">Konfirmasi Password</label>
+                                <input type="password" id="confirm-petugas-password" placeholder="Konfirmasi password">
+                            </div>
+                        </div>
+                        <button id="add-petugas-btn" class="primary-btn">Tambah Petugas</button>
+                        <div id="petugas-error" class="error-message"></div>
+                        <div id="petugas-success" class="success-message"></div>
+                    </div>
+                    <div class="settings-section">
+                        <h3>Daftar Petugas</h3>
+                        <div id="petugas-list" class="petugas-list">
+                            <!-- Petugas list will be populated here -->
+                        </div>
                     </div>
                 </div>
 
