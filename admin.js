@@ -406,6 +406,7 @@ function setupEventListeners() {
     // Queue management
     document.getElementById('complete-queue-btn').addEventListener('click', completeQueue);
     document.getElementById('call-next-btn').addEventListener('click', callNextQueue);
+    document.getElementById('cancel-queue-btn').addEventListener('click', cancelQueue);
     document.getElementById('reset-queue-btn').addEventListener('click', resetQueue);
     document.getElementById('update-note-btn').addEventListener('click', updateQueueNote);
 
@@ -964,5 +965,36 @@ function deletePetugas(index) {
         petugas.splice(index, 1);
         localStorage.setItem('petugasList', JSON.stringify(petugas));
         loadPetugasList();
+    }
+}
+
+// Cancel queue
+function cancelQueue() {
+    const currentQueue = localStorage.getItem('currentQueue');
+    if (currentQueue && currentQueue !== '-') {
+        // Add to history with status "Dibatalkan"
+        const queueHistory = JSON.parse(localStorage.getItem('queueHistory')) || [];
+        const jenisAngkutan = currentQueue.startsWith('B') ? 'Angkutan Barang' : 'Angkutan Umum';
+
+        queueHistory.push({
+            number: currentQueue,
+            type: jenisAngkutan,
+            status: 'Tidak Terselesaikan',
+            petugas: 'Admin',
+            timestamp: new Date().toISOString()
+        });
+
+        localStorage.setItem('queueHistory', JSON.stringify(queueHistory));
+
+        // Clear current queue
+        localStorage.setItem('currentQueue', '-');
+        document.getElementById('admin-current-number').textContent = '-';
+
+        // Update history display immediately
+        loadHistory();
+
+        alert(`Antrian ${currentQueue} telah dibatalkan dan ditambahkan ke riwayat.`);
+    } else {
+        alert('Tidak ada antrian saat ini untuk dibatalkan.');
     }
 }

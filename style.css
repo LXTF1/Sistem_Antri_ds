@@ -332,6 +332,15 @@ button:active {
     background-color: #c0392b;
 }
 
+.cancel-btn {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.cancel-btn:hover {
+    background-color: #c0392b;
+}
+
 .error-message {
     color: #e74c3c;
     margin-top: 10px;
@@ -733,6 +742,11 @@ button:active {
 /* Status colors */
 .status-selesai {
     color: green;
+    font-weight: 600;
+}
+
+.status-tidak-terselesaikan {
+    color: red;
     font-weight: 600;
 }
 
