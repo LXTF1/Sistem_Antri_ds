@@ -194,7 +194,7 @@ function deleteSlide(index) {
 // Add new slide
 function addSlide() {
     const sourceType = prompt('Pilih sumber gambar (1: URL, 2: Local)', '1');
-    
+
     if (sourceType === '1') {
         const url = prompt('Masukkan URL gambar:');
         if (url && url.trim() !== '') {
@@ -204,9 +204,26 @@ function addSlide() {
             loadSlideshowSettings();
         }
     } else if (sourceType === '2') {
-        alert('Untuk demo ini, fitur upload file local tidak tersedia. Silakan gunakan URL.');
+        // Trigger file upload
+        document.getElementById('slide-file-upload').click();
     }
 }
+
+// Handle file upload for slides
+document.getElementById('slide-file-upload').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const base64String = e.target.result;
+            let slides = JSON.parse(localStorage.getItem('slides')) || [];
+            slides.push({ src: base64String });
+            localStorage.setItem('slides', JSON.stringify(slides));
+            loadSlideshowSettings();
+        };
+        reader.readAsDataURL(file);
+    }
+});
 
 // Call next queue
 function callNextQueue() {
@@ -838,10 +855,24 @@ function loadPetugasList() {
     petugasList.innerHTML = '';
 
     // Get petugas from localStorage or use defaults
-    let petugas = JSON.parse(localStorage.getItem('petugasList')) || [
-        { username: 'petugas1', passwordHash: hashPassword('password1') },
-        { username: 'petugas2', passwordHash: hashPassword('password2') }
-    ];
+    let petugas = [];
+    try {
+        const stored = localStorage.getItem('petugasList');
+        if (stored) {
+            petugas = JSON.parse(stored);
+        }
+    } catch (e) {
+        console.error('Error parsing petugasList from localStorage:', e);
+    }
+
+    // If no petugas exist or invalid, initialize with defaults
+    if (!Array.isArray(petugas) || petugas.length === 0) {
+        petugas = [
+            { username: 'petugas1', passwordHash: hashPassword('password1') },
+            { username: 'petugas2', passwordHash: hashPassword('password2') }
+        ];
+        localStorage.setItem('petugasList', JSON.stringify(petugas));
+    }
 
     // Create petugas items
     petugas.forEach((petugasItem, index) => {
@@ -902,7 +933,21 @@ function addPetugas() {
     }
 
     // Check if username already exists
-    let petugas = JSON.parse(localStorage.getItem('petugasList')) || [];
+    let petugas = [];
+    try {
+        const stored = localStorage.getItem('petugasList');
+        if (stored) {
+            petugas = JSON.parse(stored);
+        }
+    } catch (e) {
+        console.error('Error parsing petugasList from localStorage:', e);
+    }
+    if (!Array.isArray(petugas) || petugas.length === 0) {
+        petugas = [
+            { username: 'petugas1', passwordHash: hashPassword('password1') },
+            { username: 'petugas2', passwordHash: hashPassword('password2') }
+        ];
+    }
     if (petugas.some(p => p.username === username)) {
         errorElement.textContent = 'Username sudah ada!';
         return;

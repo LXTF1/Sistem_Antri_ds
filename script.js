@@ -71,7 +71,15 @@ function initializeSlideshow() {
         if (index === 0) slideElement.classList.add('active');
         slideElement.alt = `Slide ${index + 1}`;
         slideshowContainer.appendChild(slideElement);
-        
+
+        // Add error handling for broken images
+        slideElement.addEventListener('error', function() {
+            console.log('Slideshow image failed to load:', slide.src);
+            // Instead of hiding, show a placeholder or keep the slide
+            this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyMCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIE5vdCBGb3VuZDwvdGV4dD48L3N2Zz4=';
+            this.alt = 'Image not found';
+        });
+
         // Create dot
         const dotElement = document.createElement('div');
         dotElement.className = 'dot';
@@ -99,12 +107,12 @@ function startSlideshow() {
 function nextSlide() {
     const slides = document.querySelectorAll('.slide');
     const dots = document.querySelectorAll('.dot');
-    
+
     slides[currentSlide].classList.remove('active');
     dots[currentSlide].classList.remove('active');
-    
+
     currentSlide = (currentSlide + 1) % slides.length;
-    
+
     slides[currentSlide].classList.add('active');
     dots[currentSlide].classList.add('active');
 }
@@ -112,18 +120,18 @@ function nextSlide() {
 function goToSlide(index) {
     // Clear the interval and restart
     clearInterval(slideshowInterval);
-    
+
     const slides = document.querySelectorAll('.slide');
     const dots = document.querySelectorAll('.dot');
-    
+
     slides[currentSlide].classList.remove('active');
     dots[currentSlide].classList.remove('active');
-    
+
     currentSlide = index;
-    
+
     slides[currentSlide].classList.add('active');
     dots[currentSlide].classList.add('active');
-    
+
     startSlideshow();
 }
 
