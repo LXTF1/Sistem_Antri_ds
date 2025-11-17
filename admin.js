@@ -248,7 +248,7 @@ function callNextQueue() {
         loadQueueList();
 
         // Announce the next queue
-        speakText(`Panggilan nomor antrian ${nextQueue} silahkan menuju ruangan uji.`);
+        speakText(`antrian ${nextQueue} silahkan menuju loket`);
     } else {
         alert('Tidak ada antrian berikutnya.');
     }
