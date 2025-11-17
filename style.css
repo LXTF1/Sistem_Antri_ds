@@ -746,7 +746,7 @@ button:active {
 }
 
 .status-tidak-terselesaikan {
-    color: red;
+    color: #e74c3c;
     font-weight: 600;
 }
 

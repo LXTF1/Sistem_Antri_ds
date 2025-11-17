@@ -98,10 +98,12 @@ function loadAdminData() {
     const totalQueue = parseInt(localStorage.getItem('totalQueue') || '0');
     const processedQueue = parseInt(localStorage.getItem('processedQueue') || '0');
     const remainingQueue = parseInt(localStorage.getItem('remainingQueue') || '0');
+    const skippedQueue = parseInt(localStorage.getItem('skippedQueue') || '0');
 
     document.getElementById('total-queue').textContent = totalQueue;
     document.getElementById('processed-queue').textContent = processedQueue;
     document.getElementById('remaining-queue').textContent = remainingQueue;
+    document.getElementById('skipped-queue').textContent = skippedQueue;
 
     // Load and display queue list
     loadQueueList();
@@ -260,6 +262,7 @@ function resetQueue() {
         localStorage.setItem('totalQueue', '0');
         localStorage.setItem('processedQueue', '0');
         localStorage.setItem('remainingQueue', '0');
+        localStorage.setItem('skippedQueue', '0');
         localStorage.setItem('angkutanQueue', '0');
         localStorage.setItem('barangQueue', '0');
 
@@ -267,6 +270,7 @@ function resetQueue() {
         document.getElementById('total-queue').textContent = '0';
         document.getElementById('processed-queue').textContent = '0';
         document.getElementById('remaining-queue').textContent = '0';
+        document.getElementById('skipped-queue').textContent = '0';
 
         // Update queue list display
         loadQueueList();
@@ -965,6 +969,33 @@ function deletePetugas(index) {
         petugas.splice(index, 1);
         localStorage.setItem('petugasList', JSON.stringify(petugas));
         loadPetugasList();
+    }
+}
+
+// Skip queue
+function skipQueue() {
+    const currentQueue = localStorage.getItem('currentQueue');
+    if (currentQueue && currentQueue !== '-') {
+        // Move current queue to the end of the queue list
+        let queueList = JSON.parse(localStorage.getItem('queueList')) || [];
+        queueList.push(currentQueue);
+        localStorage.setItem('queueList', JSON.stringify(queueList));
+
+        // Update statistics
+        const skippedQueue = parseInt(localStorage.getItem('skippedQueue') || '0') + 1;
+        localStorage.setItem('skippedQueue', skippedQueue.toString());
+        document.getElementById('skipped-queue').textContent = skippedQueue;
+
+        // Clear current queue
+        localStorage.setItem('currentQueue', '-');
+        document.getElementById('admin-current-number').textContent = '-';
+
+        // Update queue list display
+        loadQueueList();
+
+        alert(`Antrian ${currentQueue} telah dilewati dan dipindahkan ke akhir antrian.`);
+    } else {
+        alert('Tidak ada antrian saat ini untuk dilewati.');
     }
 }
 

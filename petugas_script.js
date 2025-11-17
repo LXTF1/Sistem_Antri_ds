@@ -75,10 +75,12 @@ function loadPetugasData() {
     const totalQueue = parseInt(localStorage.getItem('totalQueue') || '0');
     const processedQueue = parseInt(localStorage.getItem('processedQueue') || '0');
     const remainingQueue = parseInt(localStorage.getItem('remainingQueue') || '0');
+    const skippedQueue = parseInt(localStorage.getItem('skippedQueue') || '0');
 
     document.getElementById('total-queue').textContent = totalQueue;
     document.getElementById('processed-queue').textContent = processedQueue;
     document.getElementById('remaining-queue').textContent = remainingQueue;
+    document.getElementById('skipped-queue').textContent = skippedQueue;
 
     // Load and display queue list
     loadQueueList();
@@ -162,6 +164,7 @@ function resetQueue() {
         localStorage.setItem('totalQueue', '0');
         localStorage.setItem('processedQueue', '0');
         localStorage.setItem('remainingQueue', '0');
+        localStorage.setItem('skippedQueue', '0');
         localStorage.setItem('angkutanQueue', '0');
         localStorage.setItem('barangQueue', '0');
 
@@ -169,6 +172,7 @@ function resetQueue() {
         document.getElementById('total-queue').textContent = '0';
         document.getElementById('processed-queue').textContent = '0';
         document.getElementById('remaining-queue').textContent = '0';
+        document.getElementById('skipped-queue').textContent = '0';
 
         // Update queue list display
         loadQueueList();
@@ -306,6 +310,7 @@ function setupEventListeners() {
     // Queue management
     document.getElementById('complete-queue-btn').addEventListener('click', completeQueue);
     document.getElementById('call-next-btn').addEventListener('click', callNextQueue);
+    document.getElementById('cancel-queue-btn').addEventListener('click', cancelQueue);
     document.getElementById('reset-queue-btn').addEventListener('click', resetQueue);
     document.getElementById('update-note-btn').addEventListener('click', updateQueueNote);
 
@@ -421,6 +426,89 @@ function completeQueue() {
     }
 }
 
+// Cancel queue
+function cancelQueue() {
+    const currentQueue = localStorage.getItem('currentQueue');
+    const currentQueuePetugas = localStorage.getItem('currentQueuePetugas');
+    const loggedInPetugas = sessionStorage.getItem('currentPetugas');
+
+    if (currentQueue && currentQueue !== '-') {
+        // Check if the logged-in petugas is the one who called this queue
+        if (currentQueuePetugas !== loggedInPetugas) {
+            alert('Hanya petugas yang memanggil antrian ini yang dapat membatalkannya.');
+            return;
+        }
+
+        // Add to history with status "Tidak Terselesaikan"
+        const queueHistory = JSON.parse(localStorage.getItem('queueHistory')) || [];
+        const jenisAngkutan = currentQueue.startsWith('B') ? 'Angkutan Barang' : 'Angkutan Umum';
+        const currentPetugas = sessionStorage.getItem('currentPetugas') || 'Petugas';
+
+        queueHistory.push({
+            number: currentQueue,
+            type: jenisAngkutan,
+            status: 'Tidak Terselesaikan',
+            petugas: currentPetugas,
+            timestamp: new Date().toISOString()
+        });
+
+        localStorage.setItem('queueHistory', JSON.stringify(queueHistory));
+
+        // Update skipped queue counter
+        const skippedQueue = parseInt(localStorage.getItem('skippedQueue') || '0') + 1;
+        localStorage.setItem('skippedQueue', skippedQueue.toString());
+        document.getElementById('skipped-queue').textContent = skippedQueue;
+
+        // Clear current queue and petugas (do not increment processed count)
+        localStorage.setItem('currentQueue', '-');
+        localStorage.removeItem('currentQueuePetugas');
+        document.getElementById('admin-current-number').textContent = '-';
+
+        // Refresh history display
+        loadHistory();
+
+        alert(`Antrian ${currentQueue} telah dibatalkan dan ditambahkan ke riwayat.`);
+    } else {
+        alert('Tidak ada antrian saat ini untuk dibatalkan.');
+    }
+}
+
+// Skip queue
+function skipQueue() {
+    const currentQueue = localStorage.getItem('currentQueue');
+    const currentQueuePetugas = localStorage.getItem('currentQueuePetugas');
+    const loggedInPetugas = sessionStorage.getItem('currentPetugas');
+
+    if (currentQueue && currentQueue !== '-') {
+        // Check if the logged-in petugas is the one who called this queue
+        if (currentQueuePetugas !== loggedInPetugas) {
+            alert('Hanya petugas yang memanggil antrian ini yang dapat melewatkannya.');
+            return;
+        }
+
+        // Move current queue to the end of the list
+        let queueList = JSON.parse(localStorage.getItem('queueList')) || [];
+        queueList.push(currentQueue);
+        localStorage.setItem('queueList', JSON.stringify(queueList));
+
+        // Update skipped queue statistics
+        const skippedQueue = parseInt(localStorage.getItem('skippedQueue') || '0') + 1;
+        localStorage.setItem('skippedQueue', skippedQueue.toString());
+
+        // Clear current queue and petugas
+        localStorage.setItem('currentQueue', '-');
+        localStorage.removeItem('currentQueuePetugas');
+        document.getElementById('admin-current-number').textContent = '-';
+
+        // Refresh display
+        loadPetugasData();
+
+        alert(`Antrian ${currentQueue} telah dilewati dan dipindahkan ke akhir antrian.`);
+    } else {
+        alert('Tidak ada antrian saat ini untuk dilewati.');
+    }
+}
+
 // Speech functionality
 function speakText(text) {
     // Using the free Web Speech API
@@ -458,11 +546,13 @@ function loadHistory() {
         const formattedDate = timestamp.toLocaleDateString('id-ID');
         const formattedTime = timestamp.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
+        const statusClass = item.status === 'Selesai' ? 'status-selesai' : item.status === 'Tidak Terselesaikan' ? 'status-tidak-terselesaikan' : '';
+
         row.innerHTML = `
             <td>${index + 1}</td>
             <td>${item.number}</td>
             <td>${item.type}</td>
-            <td>${item.status}</td>
+            <td class="${statusClass}">${item.status}</td>
             <td>${item.petugas && item.petugas !== 'undefined' ? item.petugas : 'Petugas'}</td>
             <td>${formattedDate} ${formattedTime}</td>
         `;
@@ -517,11 +607,13 @@ function filterHistory() {
         const formattedDate = timestamp.toLocaleDateString('id-ID');
         const formattedTime = timestamp.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
+        const statusClass = item.status === 'Selesai' ? 'status-selesai' : item.status === 'Tidak Terselesaikan' ? 'status-tidak-terselesaikan' : '';
+
         row.innerHTML = `
             <td>${index + 1}</td>
             <td>${item.number}</td>
             <td>${item.type}</td>
-            <td>${item.status}</td>
+            <td class="${statusClass}">${item.status}</td>
             <td>${item.petugas && item.petugas !== 'undefined' ? item.petugas : 'Petugas'}</td>
             <td>${formattedDate} ${formattedTime}</td>
         `;
